@@ -2,7 +2,6 @@ package fr.lernejo.navybattle;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -34,7 +33,12 @@ public class Fire implements HttpHandler {
         if (gameMap.grid[jsonParsing.x][jsonParsing.y] == 0) {
             return 0;
         } else {
-            return 1;
+            var sunk = new SunkBoat();
+            int stat = sunk.sunkBoat(gameMap, jsonParsing);
+            if (stat == 0)
+                return 1;
+            else
+                return 2;
         }
     }
 

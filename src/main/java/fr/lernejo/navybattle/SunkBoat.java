@@ -1,7 +1,7 @@
 package fr.lernejo.navybattle;
 
 public class SunkBoat {
-    public int sunBoat(Grid gameMap, FireJsonHandler jsonParsing) {
+    public int sunkBoat(Grid gameMap, FireJsonHandler jsonParsing) {
         if (gameMap.grid[jsonParsing.x][jsonParsing.y] == 1 && sunkCarrier(gameMap) == 0)
             return 0;
         else if (gameMap.grid[jsonParsing.x][jsonParsing.y] == 2 && sunkCruiser(gameMap) == 0)
@@ -38,7 +38,26 @@ public class SunkBoat {
         if (boatPart == 1)
             return 0;
         else if (boatPart == 4)
-            return 
+            return checkSunkDestroyer(gameMap.grid);
+        return 1;
+    }
+
+    private int checkSunkDestroyer(int[][] map) {
+        for (int i = 0; i < 10; ++i) {
+            for (int j = 0; j < 10; ++j) {
+                if (map[i][j] == 3 && (j > 0 && j < 9 && (map[i][j - 1] != 3 || map[i][j + 1] != 3))) {
+                    if (i != 0 && i < 9 && (map[i - 1][j] != 3 || map[i + 1][j] != 3))
+                        return 0;
+                    else if ((i == 0 && map[i + 1][j] != 3) || (i== 9 && map[i - 1][j] != 3))
+                        return 0;
+                } else if (map[i][j] == 3 && (j == 0 && map[i][j + 1] != 3) || (j == 9 && map[i][j - 1] != 3)) {
+                    if (i > 0 && i < 9 && (map[i - 1][j] != 3 || map[i + 1][j] != 3))
+                        return 0;
+                    else if ((i == 0 && map[i + 1][j] != 3) || (i == 9 && map[i + 1][j] != 3))
+                        return 0;
+                }
+            }
+        }
         return 1;
     }
 
