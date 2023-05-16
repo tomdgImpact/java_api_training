@@ -3,7 +3,6 @@ package fr.lernejo.navy_battle;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -12,39 +11,39 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class ServerSide {
-    public final Game game;
+    public final Game gameBoard;
     public final String serverID;
-    final int port;
-    final HandlerRequests requests;
-    public final String url;
-    public final String[] saveUrl;
+    public final String[] endPoints;
     public final HttpServer server;
+    final Request request;
+    public final String url;
+    final int portNum;
 
     final HttpHandler ping = exchange -> {
-        String httpBody = "OK";
-        exchange.sendResponseHeaders(200, httpBody.length());
+        String body = "OK";
+        exchange.sendResponseHeaders(200, body.length());
         try (OutputStream os = exchange.getResponseBody()) {
-            os.write(httpBody.getBytes());
+            os.write(body.getBytes());
         }
     };
 
-    public void htmlFormat(HttpExchange httpExchange, int error) throws IOException {
-        String httpBody = String.format("<h1>%s</h1>", error);
-        httpExchange.sendResponseHeaders(error, httpBody.length());
+    public void formatHtml(HttpExchange httpExchange, int error) throws IOException {
+        String body = String.format("<h1>%s</h1>", error);
+        httpExchange.sendResponseHeaders(error, body.length());
         try (OutputStream os = httpExchange.getResponseBody()) {
-            os.write(httpBody.getBytes());
+            os.write(body.getBytes());
         }
     }
 
-    final HttpHandler start = new HttpHandler() {
+    final HttpHandler startServer = new HttpHandler() {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
-            if (game.inGame[0] || !httpExchange.getRequestMethod().equals("POST")) {
-                htmlFormat(httpExchange, 404);
+            if (gameBoard .inGame[0] || !httpExchange.getRequestMethod().equals("POST")) {
+                formatHtml(httpExchange, 404);
                 return;
             }
             try {
-                requests.HandlerStart(httpExchange, false);
+                request.HandlerStart(httpExchange, false);
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
@@ -55,31 +54,30 @@ public class ServerSide {
         @Override
         public void handle(HttpExchange httpExchange) throws IOException {
             if (!httpExchange.getRequestMethod().equals("GET")) {
-                htmlFormat(httpExchange, 404);
+                formatHtml(httpExchange, 404);
                 return;
             }
-            requests.HandlerFire(httpExchange, false);
+            request.ReceiveFire(httpExchange, false);
         }
     };
 
-
-    final HttpHandler defaultHandler = httpExchange -> htmlFormat(httpExchange, 404);
+    final HttpHandler defaultVal = httpExchange -> formatHtml(httpExchange, 404);
 
     public ServerSide(String port) throws IOException {
-        this.port = Integer.parseInt(port);
-        url = String.format("http://localhost:%s", port);
-        Executor thread = Executors.newFixedThreadPool(1);
-        server = HttpServer.create(new InetSocketAddress(this.port), 50);
-        server.setExecutor(thread);
-        server.createContext("/ping", this.ping);
-        server.createContext("/api/game/start", this.start);
-        server.createContext("/api/game/fire", this.shoot);
-        server.createContext("/", this.defaultHandler);
+        portNum = Integer.parseInt(port);
+        InetSocketAddress socket = new InetSocketAddress(portNum);
+        server = HttpServer.create(socket, 0); // use default backlog
+        Executor execServer = Executors.newFixedThreadPool(1);
+        server.setExecutor(execServer);
+        server.createContext("/ping", ping);
+        server.createContext("/api/game/start", startServer);
+        server.createContext("/api/game/fire", shoot);
+        server.createContext("/", defaultVal);
         this.serverID = UUID.randomUUID().toString();
-        requests = new HandlerRequests(this);
+        request = new Request(this);
         server.start();
-        game = new Game(this);
-        saveUrl = new String[]{""};
+        gameBoard  = new Game(this);
+        endPoints = new String[]{""};
+        url = String.format("http://localhost:%s", portNum);
     }
-
 }
