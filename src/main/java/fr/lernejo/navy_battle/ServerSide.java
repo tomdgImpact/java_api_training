@@ -15,7 +15,7 @@ public class ServerSide {
     public final Game game;
     public final String serverID;
     final int port;
-    final HandlerRequests requests;
+    final HttpReqHandle requests;
     public final String url;
     public final String[] saveUrl;
     public final HttpServer server;
@@ -44,7 +44,7 @@ public class ServerSide {
                 return;
             }
             try {
-                requests.HandlerStart(httpExchange, false);
+                requests.Start(httpExchange, false);
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
@@ -58,10 +58,9 @@ public class ServerSide {
                 htmlFormat(httpExchange, 404);
                 return;
             }
-            requests.HandlerFire(httpExchange, false);
+            requests.Fire(httpExchange, false);
         }
     };
-
 
     final HttpHandler defaultHandler = httpExchange -> htmlFormat(httpExchange, 404);
 
@@ -76,7 +75,7 @@ public class ServerSide {
         server.createContext("/api/game/fire", this.shoot);
         server.createContext("/", this.defaultHandler);
         this.serverID = UUID.randomUUID().toString();
-        requests = new HandlerRequests(this);
+        requests = new HttpReqHandle(this);
         server.start();
         game = new Game(this);
         saveUrl = new String[]{""};
