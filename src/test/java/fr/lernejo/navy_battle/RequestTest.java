@@ -19,7 +19,7 @@ public class RequestTest {
     void correct_start_request() {
         ServerSide s = null;
         try {
-            s = ServeurSideTest.ServerTestStart("9879");
+            s = ServerSideTest.ServerTestStart("9879");
         } catch (Exception e) {
             e.printStackTrace();
             Assertions.assertEquals(0, 1, "exceptions on server");
@@ -119,14 +119,14 @@ public class RequestTest {
         } catch (IOException | InterruptedException e) {
             Assertions.assertEquals(0, 1, "exception on request");
         }
-        ServeurSideTest.StopServer(s);
+        ServerSideTest.StopServer(s);
     }
 
     @Test
     void bad_start_request() {
         ServerSide s = null;
         try {
-            s = ServeurSideTest.ServerTestStart("9880");
+            s = ServerSideTest.ServerTestStart("9880");
         } catch (Exception e) {
             e.printStackTrace();
             Assertions.assertEquals(0, 1, "Exception on server");
@@ -228,14 +228,14 @@ public class RequestTest {
         } catch (IOException | InterruptedException e) {
             Assertions.assertEquals(0, 1, "Exception on request");
         }
-        ServeurSideTest.StopServer(s);
+        ServerSideTest.StopServer(s);
     }
 
     @Test
     void no_more_ships_to_shoot() throws IOException {
         ServerSide s = null;
         try {
-            s = ServeurSideTest.ServerTestStart("9899");
+            s = ServerSideTest.ServerTestStart("9899");
             s.gameBoard.inGame[0] = false;
         } catch (Exception e) {
             e.printStackTrace();
@@ -745,6 +745,6 @@ public class RequestTest {
         } catch (IOException e) {
             Assertions.assertEquals(0, 1, "Exception on request");
         }
-        ServeurSideTest.StopServer(s);
+        ServerSideTest.StopServer(s);
     }
 }

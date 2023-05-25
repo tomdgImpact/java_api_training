@@ -9,7 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class ServeurSideTest {
+public class ServerSideTest {
     static ServerSide ServerTestStart(String port) throws Exception {
         try {
             return new ServerSide(port);
