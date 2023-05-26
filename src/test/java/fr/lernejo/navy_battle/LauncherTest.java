@@ -1,32 +1,49 @@
 package fr.lernejo.navy_battle;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LauncherTest {
-    @Test
-    void bad_argument() {
-        try {
-            String[] strings = new String[]{"##"};
-            Launcher.main(strings);
-            Assertions.assertEquals(1, 0, "Exception");
-        } catch (IllegalArgumentException e) {
-            Assertions.assertEquals(1, 1, "IllegalArgumentException");
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            Assertions.assertEquals(1, 0, "IllegalArgumentException");
-        }
 
-        try {
-            String[] arg = new String[]{"2222", "Never gonna give you up"};
-            Launcher.main(arg);
-            Assertions.assertEquals(1, 0, "Exception");
-        } catch (URISyntaxException e) {
-            Assertions.assertEquals(1, 1, "URISyntaxException");
-        } catch (IOException | InterruptedException e) {
-            Assertions.assertEquals(1, 0, "URISyntaxException");
-        }
+    @Test
+    void main_wrong_arg(){
+        assertThrows(NumberFormatException.class, ()->{
+            Launcher.main(new String[]{"xxx"});
+        });
     }
+
+    @Test
+    void main_no_arg(){
+        assertThrows(NumberFormatException.class, ()->{
+            Launcher.main(new String[]{""});
+        });
+    }
+
+    @Test
+    void main_not_well_formed_args(){
+        assertThrows(NumberFormatException.class, ()->{
+            Launcher.main(new String[]{"a", "b"});
+        });
+    }
+
+    @Test
+    void main_launch_ping_one_arg() throws Exception {
+        Launcher.main(new String[]{"1234"});
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("http://localhost:1234/ping"))
+            .GET()
+            .build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Assertions.assertThat(response.statusCode()).as("Launcher ping test one arg").isEqualTo(200);
+    }
+
 }

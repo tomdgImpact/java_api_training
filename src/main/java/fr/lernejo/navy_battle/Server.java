@@ -1,0 +1,21 @@
+package fr.lernejo.navy_battle;
+
+import com.sun.net.httpserver.HttpServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
+public class Server {
+    public HttpServer launch(int port, Game game) throws IOException {
+        InetSocketAddress socket = new InetSocketAddress(port);
+        final HttpServer server = HttpServer.create(socket, 0);
+        server.createContext("/ping", new CallHttp());
+        server.createContext("/api/game/start", new ReqHandle(game));
+        server.createContext("/api/game/fire", new Fire(game));
+        server.setExecutor(Executors.newFixedThreadPool(1));
+        System.out.print("HTTP server started on port " + port + "...\n");
+
+        return server;
+    }
+}
