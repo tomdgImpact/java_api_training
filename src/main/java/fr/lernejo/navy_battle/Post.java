@@ -8,7 +8,6 @@ import java.net.http.HttpResponse;
 
 public class Post {
     private final int port;
-
     public Post(int port){
         this.port = port;
     }

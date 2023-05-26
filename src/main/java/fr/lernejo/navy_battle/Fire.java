@@ -15,11 +15,7 @@ public class Fire implements HttpHandler {
     public Fire(Game game){
         this.game = game;
     }
-    /*
-    public final String schema = "{\"$schema\":\"http://json-schema.org/schema#\",\"type\":\"object\"," +
-        "\"properties\":{\"consequence\":{\"type\":\"string\",\"enum\":[\"miss\",\"hit\",\"sunk\"]}," +
-        "\"shipLeft\":{\"type\":\"boolean\"}},\"required\":[\"consequence\",\"shipLeft\"]}";
-    */
+
     public String sendFireRequest(String adversaryURL, String cell) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest fireRequest = HttpRequest.newBuilder()
@@ -27,7 +23,6 @@ public class Fire implements HttpHandler {
             .setHeader("Accept", "application/json")
             .setHeader("Content-Type", "application/json")
             .build();
-
         HttpResponse<String> response = client.send(fireRequest, HttpResponse.BodyHandlers.ofString());
         return response.body();
     }
@@ -55,8 +50,8 @@ public class Fire implements HttpHandler {
         System.out.println(JSONresponse);
         String consequenceResponse = JSONresponse.getString("consequence");
         boolean shipLeftResponse = JSONresponse.getBoolean("shipLeft");
-        this.game.updateBoards(consequenceResponse, cell);
-        this.game.displayBoards();
+        game.updateBoards(consequenceResponse, cell);
+        game.displayBoards();
         if(!shipLeftResponse){System.out.println("YOU WON!"); System.exit(0);}
     }
 
@@ -64,13 +59,13 @@ public class Fire implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         if(exchange.getRequestMethod().equals("GET")){
             String cellTargeted = exchange.getRequestURI().toString().split("\\?")[1].split("=")[1];;
-            String consequence = this.game.consequenceFire(cellTargeted);
-            boolean shipLeft = this.game.isShipLeft();
+            String consequence = game.consequenceFire(cellTargeted);
+            boolean shipLeft = game.isShipLeft();
             sendFireResponse(exchange, consequence, shipLeft);
             if(!shipLeft){System.out.println("YOU LOST!"); System.exit(0);}
             try {
-                String cell = this.game.getPlayer().chooseCellToTarget();
-                String response = sendFireRequest(this.game.getPlayer().getAdversaryURL()[0], cell);
+                String cell = game.getPlayer().chooseCellToTarget();
+                String response = sendFireRequest(game.getPlayer().getAdversaryURL()[0], cell);
                 applyResponse(response, cell);
             }
             catch (InterruptedException e) {e.printStackTrace();}

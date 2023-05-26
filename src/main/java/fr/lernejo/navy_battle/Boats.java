@@ -35,8 +35,8 @@ public class Boats {
     }
 
     public boolean isSunk(){
-        for(int i=0; i<this.size; i++){
-            if(this.xPos[i] >= 0 || this.yPos[i] >= 0)
+        for(int i=0; i< size; i++){
+            if(xPos[i] >= 0 || yPos[i] >= 0)
                 return false;
         }
         return true;

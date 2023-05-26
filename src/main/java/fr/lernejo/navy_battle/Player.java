@@ -25,7 +25,7 @@ public class Player {
     }
     public void initSeas(){
         for(int i=0; i<10; i++){
-            for(int j=0; j<10; j++){this.sea[i][j] = 0; this.enemySea[i][j] = "o";}
+            for(int j=0; j<10; j++){sea[i][j] = 0; enemySea[i][j] = "o";}
         }
     }
 
@@ -33,12 +33,12 @@ public class Player {
         if(!((yPos<=9 && yPos>=0) && (xPos<=9 && xPos>=0))){System.out.println("You can't place the boat here!"); return false;}
         for(int i=0; i<boatSize; i++) {
             if (direction == 0)
-                if (this.sea[xPos][yPos+i] != 0 || (yPos - 1) + boatSize > 9) {
+                if (sea[xPos][yPos+i] != 0 || (yPos - 1) + boatSize > 9) {
                     System.out.println("You can't place the boat here!");
                     return false;
                 }
             if (direction == 1)
-                if (this.sea[xPos+i][yPos] != 0 || ((xPos) - 1) + boatSize > 9) {
+                if (sea[xPos+i][yPos] != 0 || ((xPos) - 1) + boatSize > 9) {
                     System.out.println("You can't place the boat here!");
                     return false;
                 }
@@ -47,7 +47,7 @@ public class Player {
     }
 
     public boolean checkCell(int xPos, int yPos, String cell){
-        if(this.enemySea[xPos][yPos].equals("o") && cell.matches("^[A-J]{1}([1-9]|10)$"))
+        if(enemySea[xPos][yPos].equals("o") && cell.matches("^[A-J]{1}([1-9]|10)$"))
             return true;
 
         System.out.println("You can't fire here!");
@@ -85,12 +85,12 @@ public class Player {
         int[] x = new int[typeBoat.getSize()]; int[] y = new int[typeBoat.getSize()];
         for(int i = 0; i< typeBoat.getSize(); i++){
             if(direction == 0){x[i] = (xPos); y[i] = (yPos+i);
-                this.sea[xPos][yPos+i] = typeBoat.getSize();
+                sea[xPos][yPos+i] = typeBoat.getSize();
             }
             if(direction == 1){x[i] = xPos+i; y[i] = yPos;
-                this.sea[xPos+i][yPos] = typeBoat.getSize();
+                sea[xPos+i][yPos] = typeBoat.getSize();
             }
         }
-        this.boats.add(new Boats(typeBoat.getSize(), x, y));
+        boats.add(new Boats(typeBoat.getSize(), x, y));
     }
 }
