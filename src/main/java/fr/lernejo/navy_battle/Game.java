@@ -1,58 +1,76 @@
 package fr.lernejo.navy_battle;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
 
 public class Game {
-    // State enum
-    public enum StateOfFire {
-        miss,
-        out,
-        sunk,
-        hit
+    private final Player player;
+
+    public Player getPlayer() {
+        return player;
     }
 
-    public final ServerSide server;
-    final TheFinal shoot;
-    final Pattern reg = Pattern.compile("^[A-J](10|[1-9])$");
-    final GameBoard init;
-    public final List<List<int[]>> gameBoard;
-    public final boolean[] inGame;
-
-    public Game(ServerSide server) {
-        this.server = server;
-        shoot = new TheFinal(this);
-        init = new GameBoard();
-        gameBoard = init.BuildBoard();
-        inGame = new boolean[]{false};
+    public Game(Player play){
+        player = play;
     }
 
-    public void Fire() {
-        int[] posShoot = shoot.FirePosition();
-        posShoot[0]++;
-        shoot.Shoot(posShoot);
+    public void initGame() throws IOException {
+        this.player.initSeas();
+        for(Boats.Type typeBoat : Boats.Type.values()){
+                this.player.placeBoats(typeBoat);
+                displayBoards();
+            }
     }
 
-    public StateOfFire ShootAction(String case_position) throws IOException {
-        if (!reg.matcher(case_position).find())
-            return StateOfFire.out;
-        int x_pos = Integer.parseInt(case_position.split("[A-J]")[1]) - 1;
-        int y_pos = (case_position.charAt(0) - 'A');
-        for (List<int[]> shipPos : gameBoard) {
-            for (int[] ships : shipPos) {
-                if (ships[0] == x_pos && ships[1] == y_pos) {
-                    shipPos.remove(ships);
-                    // Boat hit and sunk, remove it from game Board
-                    if (shipPos.size() == 0) {
-                        gameBoard.remove(shipPos);
-                        return StateOfFire.sunk;
-                    }
-                    return StateOfFire.hit;
-                }
+    public void displayBoards(){
+        StringBuilder builder = new StringBuilder();
+        for(int x=0; x<2; x++){
+            builder.append("  ");
+            for (int i=0; i< 10; i++) builder.append(" ").append((char)(i+65));
+        }
+        System.out.println(builder.toString());
+        for (int i = 0; i < 10; i++) {
+            System.out.print(i+1);
+            if(i<9) System.out.print(" ");
+            for (int j = 0; j < 10; j++) System.out.print(" " + this.player.getSea()[i][j]);
+            System.out.print("  ");
+            for (int j = 0; j < 10; j++) System.out.print(" " + this.player.getEnemySea()[i][j]);
+            System.out.print("\n");
+        }
+    }
+
+    public String consequenceFire(String cellTargeted){
+        int xPos = Integer.parseInt(cellTargeted.replaceAll("[A-Z]", "")) - 1; int yPos = (int)cellTargeted.charAt(0)-65;
+        if(this.player.getSea()[xPos][yPos] == 0) return "miss";
+        if(this.player.getSea()[xPos][yPos] >= 1){
+            Boats boatHitted;
+            for(int i = 0; i< this.player.getBoats().toArray().length; i++){
+                for(int j = 0; j< this.player.getBoats().get(i).getSize(); j++){
+                    if(this.player.getBoats().get(i).getxPos()[j] == xPos && this.player.getBoats().get(i).getyPos()[j] == yPos){
+                        this.player.getBoats().get(i).getxPos()[j]=-1; this.player.getBoats().get(i).getyPos()[j]=-1;
+                        boatHitted = this.player.getBoats().get(i);
+                        this.player.getSea()[xPos][yPos] = 0;
+                        if(boatHitted.isSunk()) return "sunk";
+                        else return "hit";}}}}
+        return "error";
+    }
+
+    public boolean isShipLeft(){
+        for(int i = 0; i< this.player.getBoats().toArray().length; i++){
+            for (int j = 0; j< this.player.getBoats().get(i).getSize(); j++){
+                if(this.player.getBoats().get(i).getxPos()[j] >= 0 || this.player.getBoats().get(i).getyPos()[j] >= 0)
+                    return true;
             }
         }
-        // Player miss his shoot
-        return StateOfFire.miss;
+        return false;
+    }
+
+    public void updateBoards(String consequence, String cell){
+        int yPos = ((int)cell.charAt(0))-65;
+        int xPos = Integer.parseInt(cell.replaceAll("[A-Z]", "")) - 1;
+        if(consequence.equals("miss"))
+            this.player.getEnemySea()[xPos][yPos] = "x";
+
+        if(consequence.equals("hit") || consequence.equals("sunk"))
+            this.player.getEnemySea()[xPos][yPos] = "H";
     }
 }

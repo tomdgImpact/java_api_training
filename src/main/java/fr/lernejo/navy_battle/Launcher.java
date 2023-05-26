@@ -1,24 +1,23 @@
 package fr.lernejo.navy_battle;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+import com.sun.net.httpserver.HttpServer;
+import org.apache.commons.validator.routines.UrlValidator;
 
 public class Launcher {
-
-    public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
-        if (args.length < 1 || args.length > 2) {
-            System.out.println("Specify port number, the program needs exactly 1 argument");
-            System.exit(1);
-        }
-        try {
-            ServerSide serv = new ServerSide(args[0]);
-            if (args.length == 2) {
-                Client client = new Client(serv, args[1]);
-                client.Connect();
+    public static void main(String[] args) throws Exception {
+        if (args.length < 1) {System.out.println("Please enter a port number !"); System.exit(1);}
+        try{
+            final int port = Integer.parseInt(args[0]);
+            Player player = new Player(); Game game = new Game(player);
+            HttpServer server = new Server().launch(port, game); server.start();
+            game.initGame();
+            if (args.length > 1){
+                UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+                if(!urlValidator.isValid(args[1])){ System.out.println("Adversary's URL " + args[1] + " isn't valid !");
+                    System.exit(1);}
+                game.getPlayer().getAdversaryURL()[0] = args[1];
+                Post postRequest = new Post(port); postRequest.sendPostRequest(args[1]);
             }
-        } catch (IOException | URISyntaxException | InterruptedException e) {
-            System.out.println("Not Integer, please specify a correct port number");
-            throw e;
-        }
+        } catch (Exception e){throw new NumberFormatException(e.getMessage());}
     }
 }
